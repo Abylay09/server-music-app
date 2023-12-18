@@ -1,5 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Music } from 'src/music/entities/music.entity';
 @Entity()
 export class Artist {
   @PrimaryGeneratedColumn()
@@ -16,4 +16,7 @@ export class Artist {
 
   @Column({ nullable: true })
   image: string;
+
+  @OneToMany(() => Music, (music) => music.artistId)
+  tracks: Music[];
 }

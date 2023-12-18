@@ -11,6 +11,10 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+/public/artist
+/public/music
+
+
 # OS
 .DS_Store
 

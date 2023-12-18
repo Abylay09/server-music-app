@@ -30,7 +30,7 @@ export class AuthController {
     try {
       await this.userService.create(createUserDto);
       return response
-        .status(201)
+        .status(200)
         .json({ message: 'Пользователь успешно зарегистрирован' });
     } catch (error) {
       return response
