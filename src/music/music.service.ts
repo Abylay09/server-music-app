@@ -19,11 +19,8 @@ export class MusicService {
         .getOne();
 
       if (track) {
-        // Track with the same name already exists, do nothing
-
         return;
       } else {
-        // Insert a new track
         return await this.musicRepository
           .createQueryBuilder()
           .insert()
@@ -34,24 +31,20 @@ export class MusicService {
     } catch (error) {
       throw new InternalServerErrorException('Internal server error', error);
     }
-    // const track = await this.musicRepository
-    //   .createQueryBuilder('music')
-    //   .where('music.name = :name', { name: filename })
-    //   .getOne();
-    // if (track) {
-    //   return;
-    // } else {
-    //   return await this.musicRepository
-    //     .createQueryBuilder()
-    //     .insert()
-    //     .into(Music)
-    //     .values([{ name: filename, artistId: artistId }])
-    //     .execute();
-    // }
   }
 
   async findAll() {
     return await this.musicRepository.createQueryBuilder('music').getMany();
+  }
+
+  async searchByTitle(name: string): Promise<Music[]> {
+    if (!name.trim()) {
+      return [];
+    }
+    return this.musicRepository
+      .createQueryBuilder('music')
+      .where('music.name LIKE :name', { name: `%${name}%` })
+      .getMany();
   }
 
   async findWithArtist(id: number) {

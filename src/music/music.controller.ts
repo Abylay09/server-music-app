@@ -10,12 +10,15 @@ import {
   HttpException,
   Res,
   InternalServerErrorException,
+  UseGuards,
+  Query,
 } from '@nestjs/common';
 import { MusicService } from './music.service';
 import { CreateMusicDto } from './dto/create-music.dto';
 import { UpdateMusicDto } from './dto/update-music.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
+import { AuthGuard } from '../auth/auth.guard';
 @Controller('music')
 export class MusicController {
   constructor(private readonly musicService: MusicService) {}
@@ -26,7 +29,7 @@ export class MusicController {
       storage: diskStorage({
         destination: 'public/music',
         filename: (req, file, cb) => {
-          cb(null, file.originalname);
+          cb(null, Buffer.from(file.originalname, 'latin1').toString('utf8'));
         },
       }),
     }),
@@ -58,7 +61,6 @@ export class MusicController {
       throw new InternalServerErrorException('Internal server error', error);
     }
   }
-
   @Post('/delete-track/:id')
   deleteTrack(@Param('id') id: string, @Res() response) {
     const result = this.musicService.remove(+id);
@@ -83,12 +85,27 @@ export class MusicController {
     }
   }
 
+  // @UseGuards(AuthGuard)
   @Get('/get-all-tracks')
   async findAll() {
     try {
       return this.musicService.findAll();
     } catch (error) {
       throw new InternalServerErrorException(error);
+    }
+  }
+
+  @Get('search')
+  async searchByTitle(@Query('name') name: string) {
+    try {
+      const result = await this.musicService.searchByTitle(name);
+      if (result) {
+        return { success: true, data: result };
+      } else {
+        return { success: true, data: [] };
+      }
+    } catch (error) {
+      return { success: false, message: 'Error searching music by title' };
     }
   }
 
@@ -110,6 +127,5 @@ export class MusicController {
         error: 'Internal server error',
       });
     }
-    // return this.musicService.update(+id, updateMusicDto);
   }
 }
