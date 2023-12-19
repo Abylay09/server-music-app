@@ -41,7 +41,17 @@ export class ArtistService {
       const artist = await this.findOne(id);
 
       if (artist.image) {
-        await fs.promises.unlink(`public/artist/images/${artist.image}`);
+        const imagePath = `public/artist/images/${artist.image}`;
+        try {
+          await fs.promises.access(imagePath, fs.constants.F_OK);
+          await fs.promises.unlink(imagePath);
+        } catch (error) {
+          if (error.code === 'ENOENT') {
+            console.log(`File not found: ${imagePath}`);
+          } else {
+            throw error;
+          }
+        }
       }
 
       await this.artistRepository
@@ -57,6 +67,30 @@ export class ArtistService {
       throw new InternalServerErrorException('Internal server error');
     }
   }
+
+  // async update(id: number, updateArtistDto: UpdateArtistDto, fileName: string) {
+  //   try {
+  //     const artist = await this.findOne(id);
+
+  //     if (artist.image) {
+  //       try {
+  //         await fs.promises.unlink(`public/artist/images/${artist.image}`);
+  //       } catch (error) {}
+  //     }
+
+  //     await this.artistRepository
+  //       .createQueryBuilder()
+  //       .update(Artist)
+  //       .set({ ...updateArtistDto, image: fileName })
+  //       .where('id = :id', { id })
+  //       .execute();
+
+  //     return true;
+  //   } catch (error) {
+  //     console.error('Error in update:', error.message);
+  //     throw new InternalServerErrorException('Internal server error');
+  //   }
+  // }
 
   async remove(id: number) {
     try {
