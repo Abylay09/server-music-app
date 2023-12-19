@@ -28,7 +28,7 @@ export class ArtistController {
       storage: diskStorage({
         destination: 'public/artist/images',
         filename: (req, file, cb) => {
-          cb(null, file.originalname);
+          cb(null, Buffer.from(file.originalname, 'latin1').toString('utf8'));
         },
       }),
     }),
